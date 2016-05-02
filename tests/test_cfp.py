@@ -1,6 +1,10 @@
 
 from __future__ import absolute_import
 import unittest
+
+from hypothesis import given
+from hypothesis.strategies import lists, integers
+
 from apps.majority_judgement import (
     get_floor_median, calculate_score, calculate_normalised_score,
     calculate_max_normalised_score,
@@ -90,3 +94,21 @@ class CFPRankingTestCase(unittest.TestCase):
                         reverse=True)
 
         assert expected == result
+
+    @given(lists(integers(min_value=0, max_value=2)))
+    def test_score_rankings_increase_as_expected(self, test_scores):
+        initial = calculate_max_normalised_score(test_scores)
+        increased = test_scores + [2, ]
+        assert len(increased) > len(test_scores)
+
+        increased = calculate_max_normalised_score(increased)
+        assert initial <= increased
+
+    @given(lists(integers(min_value=0, max_value=2)))
+    def test_score_rankings_decrease_as_expected(self, test_scores):
+        initial = calculate_max_normalised_score(test_scores)
+        decreased = test_scores + [0, ]
+        assert len(decreased) > len(test_scores)
+
+        decreased = calculate_max_normalised_score(decreased)
+        assert initial >= decreased
